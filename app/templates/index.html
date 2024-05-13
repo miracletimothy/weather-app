@@ -1,0 +1,70 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+</head>
+<body>
+    <h1>Weather App</h1>
+    <form id="weather-form">
+        <label for="location">Enter Location:</label>
+        <input type="text" id="location" name="location" required>
+        <button type="submit">Get Weather</button>
+    </form>
+
+    <div id="weather-data"></div>
+
+    <div id="loading-indicator" style="display: none;">Loading...</div>
+
+    <script>
+        document.getElementById("weather-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            var location = document.getElementById("location").value;
+            var xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var weatherData = JSON.parse(xhr.responseText);
+                        displayWeatherData(weatherData);
+                    } else {
+                        console.error("Error:", xhr.statusText);
+                        displayError("Failed to fetch weather data.");
+                    }
+                    hideLoadingIndicator();
+                } else {
+                    showLoadingIndicator();
+                }
+            };
+
+            xhr.open("GET", "/weather?location=" + encodeURIComponent(location));
+            xhr.send();
+        });
+
+        function displayWeatherData(weatherData) {
+            var weatherDiv = document.getElementById("weather-data");
+            weatherDiv.innerHTML = `
+                <h2>Weather Data</h2>
+                <p>Temperature: ${weatherData.temperature} ${weatherData.unit}</p>
+                <p>Description: ${weatherData.description}</p>
+            `;
+        }
+
+        function displayError(message) {
+            var weatherDiv = document.getElementById("weather-data");
+            weatherDiv.innerHTML = `<p>${message}</p>`;
+        }
+
+        function showLoadingIndicator() {
+            document.getElementById("loading-indicator").style.display = "block";
+        }
+
+        function hideLoadingIndicator() {
+            document.getElementById("loading-indicator").style.display = "none";
+        }
+    </script>
+</body>
+</html>
